@@ -71,9 +71,9 @@ class LoadImageWithInfo(LoadImage):
             extra_pnginfo_loaded = img.text if hasattr(img,'text') else {}
 
             print("extra_pnginfo_loaded")
-			print(extra_pnginfo_loaded)
+	    print(extra_pnginfo_loaded)
             print("Image.info")
-			print(img.info)
+	    print(img.info)
             
             if not 'workflow' in extra_pnginfo_loaded:  # image doesn't have workflow saved
                 return loaded + (json.dumps({}),)
