@@ -69,8 +69,6 @@ class LoadImageWithInfo(LoadImage):
         filepath = get_annotated_filepath(image)
         with Image.open(filepath) as img:
 
-            print("extra_pnginfo_loaded")
-            print(*extra_pnginfo_loaded)
             print("Image.info")
             print(*img.info)
             print("Image.text")
