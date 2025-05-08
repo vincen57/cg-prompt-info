@@ -68,12 +68,13 @@ class LoadImageWithInfo(LoadImage):
         loaded = self.load_image(image)
         filepath = get_annotated_filepath(image)
         with Image.open(filepath) as img:
-            extra_pnginfo_loaded = img.text if hasattr(img,'text') else {}
 
             print("extra_pnginfo_loaded")
             print(*extra_pnginfo_loaded)
             print("Image.info")
             print(*img.info)
+
+            extra_pnginfo_loaded = img.text if hasattr(img,'text') else {}           
             
             if not 'workflow' in extra_pnginfo_loaded:  # image doesn't have workflow saved
                 return loaded + (json.dumps({}),)
