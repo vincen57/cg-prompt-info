@@ -72,7 +72,7 @@ class LoadImageWithInfo(LoadImage):
             print("Image.info")
             print(*img.info)
 
-            extra_pnginfo_loaded = img.text if hasattr(img,'text') else {}           
+            extra_pnginfo_loaded = img.text if hasattr(img,'text') else img.info          
 
             print("Image.text")
             print(*extra_pnginfo_loaded)
