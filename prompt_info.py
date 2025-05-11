@@ -69,13 +69,14 @@ class LoadImageWithInfo(LoadImage):
         filepath = get_annotated_filepath(image)
         with Image.open(filepath) as img:
 
-            print("Image.info")
-            print(*img.info)
-
-            extra_pnginfo_loaded = img.text if hasattr(img,'text') else img.info          
-
-            print("Image.text")
-            print(*extra_pnginfo_loaded)
+            if hasattr(img,'text'):
+                extra_pnginfo_loaded = img.text               
+            else:
+                #Deal with EXIF data for the webp format
+                exifdata = img.getexif()              
+                wf=exifdata.get(0x010E)[10:].replace('"', '\\"')
+                pr=exifdata.get(0x010F)[8:].replace('"', '\\"')
+                extra_pnginfo_loaded=json.loads("{\"prompt\": \""+pr+"\", \"workflow\": \""+wf+"\"}")                     
             
             if not 'workflow' in extra_pnginfo_loaded:  # image doesn't have workflow saved
                 return loaded + (json.dumps({}),)
