@@ -73,10 +73,13 @@ class LoadImageWithInfo(LoadImage):
                 extra_pnginfo_loaded = img.text               
             else:
                 #Deal with EXIF data for the webp format
-                exifdata = img.getexif()              
-                wf=exifdata.get(0x010E)[10:].replace('"', '\\"')
-                pr=exifdata.get(0x010F)[8:].replace('"', '\\"')
-                extra_pnginfo_loaded=json.loads("{\"prompt\": \""+pr+"\", \"workflow\": \""+wf+"\"}")                     
+                try:
+                    exifdata = img.getexif()              
+                    wf=exifdata.get(0x010E)[10:].replace('"', '\\"')
+                    pr=exifdata.get(0x010F)[8:].replace('"', '\\"')
+                    extra_pnginfo_loaded=json.loads("{\"prompt\": \""+pr+"\", \"workflow\": \""+wf+"\"}")
+                except:
+                    extra_pnginfo_loaded={}
             
             if not 'workflow' in extra_pnginfo_loaded:  # image doesn't have workflow saved
                 return loaded + (json.dumps({}),)
