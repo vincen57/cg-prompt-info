@@ -16,8 +16,8 @@ def represent(thing):
     return f"{thing}"[:30]
         
 def insertAllInAndOut(prompt, extra, all_outputs=None):
-    extra['workflow']['values'] = {}
-    for node in extra['workflow']['nodes']:
+    extra['values'] = {}
+    for node in extra['nodes']:
         node_id = str(node['id'])
         out = {}
         inp = {}
@@ -41,7 +41,7 @@ def insertAllInAndOut(prompt, extra, all_outputs=None):
                 inp[name] = represent(v)
 
         if inp or out:
-            extra['workflow']['values'][node_id] = {"type":node['type'],"inputs":inp,"outputs":out}
+          extra['values'][node_id] = {"type":node['type'],"inputs":inp,"outputs":out}
         
 class AddInfo():
     CATEGORY = "prompt_info"
@@ -68,16 +68,35 @@ class LoadImageWithInfo(LoadImage):
         loaded = self.load_image(image)
         filepath = get_annotated_filepath(image)
         with Image.open(filepath) as img:
-            extra_pnginfo_loaded = img.text if hasattr(img,'text') else {}
 
+            if hasattr(img,'text'):
+                extra_pnginfo_loaded = img.text               
+            else:
+                #Deal with EXIF data for the webp format
+                try:
+                    exifdata = img.getexif()                                  
+                    wf=exifdata.get(0x010E)[10:]
+                    pr=exifdata.get(0x010F)[8:]                   
+                    prompt=json.loads(pr)
+                    wflow=json.loads(wf)
+                    
+                    if not 'values' in wflow: # workflow doesn't have values - do what we can
+                        insertAllInAndOut(prompt, wflow)
+            
+                    return loaded + (json.dumps(wflow['values'], indent=2),)
+                   
+                except:
+                    return loaded + (json.dumps({}),)
+            
             if not 'workflow' in extra_pnginfo_loaded:  # image doesn't have workflow saved
                 return loaded + (json.dumps({}),)
-            
+                                            
             extra_pnginfo_loaded['workflow'] = json.loads(extra_pnginfo_loaded['workflow'])
             prompt = json.loads(extra_pnginfo_loaded['prompt'])
+            wflow = extra_pnginfo_loaded['workflow']
             
             if not 'values' in extra_pnginfo_loaded['workflow']: # workflow doesn't have values - do what we can
-                insertAllInAndOut(prompt, extra_pnginfo_loaded)
+                insertAllInAndOut(prompt, wflow)
             
             return loaded + (json.dumps(extra_pnginfo_loaded['workflow']['values'], indent=2),)
             
